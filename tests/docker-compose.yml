@@ -1,0 +1,14 @@
+version: "3.6"
+services: 
+    cmockatest:
+        # stdin_open: true # docker run -i
+        # tty: true        # docker run -t
+
+        build: .
+        volumes:
+            - ./:/home/src
+            - ./../src/:/home/sources/
+            - ./../includes/:/home/includes/
+            
+        # command: make all
+        # command: ./simple_test

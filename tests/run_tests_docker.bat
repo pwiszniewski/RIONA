@@ -1,0 +1,1 @@
+docker-compose run --rm cmockatest /bin/bash -c "make all && ./metrics_test && ./test_classes && ./test_values && ./test_attributes && ./test_rules && ./test_dissimilarities && ./test_riona"

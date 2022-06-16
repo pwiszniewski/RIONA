@@ -1,0 +1,15 @@
+#,age       
+N,sex       
+N,chest pain type     
+#,resting blood pressure  
+#,serum cholestoral in mg/dl      
+N,fasting blood sugar > 120 mg/dl       
+N,resting electrocardiographic results
+#,maximum heart rate achieved  
+N,exercise induced angina    
+#,oldpeak = ST depression induced by exercise relative to rest   
+#,the slope of the peak exercise ST segment     
+#,number of major vessels (0-3) colored by flourosopy        
+N,thal
+$,heart disease  
+

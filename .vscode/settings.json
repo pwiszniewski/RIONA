@@ -1,0 +1,18 @@
+{
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "direct.h": "c",
+        "definitions.h": "c",
+        "classes.h": "c",
+        "mem_utils.h": "c",
+        "dissimilarities.h": "c",
+        "timing.h": "c",
+        "metrics.h": "c",
+        "stat.h": "c",
+        "typeinfo": "c",
+        "riona.h": "c",
+        "random": "c",
+        "limits": "cpp",
+        "cstdlib": "cpp"
+    }
+}
