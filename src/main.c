@@ -26,6 +26,7 @@
 #include "values_classes.h"
 #include "attributes.h"
 #include "cross_validation.h"
+#include "my_cuda.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -51,16 +52,16 @@ int get_optimal_k_neigh(int k_max, int num_inst, int num_attr, float values[][nu
     int classes_pred_find_optk[][k_max], int *classes_pred_optk, stats_find_optk *sfoptk, 
     timing_optk *toptk)
 {
-    printf("2\n");
+    // printf("2\n");
     float min_values[num_attr];
     float max_values[num_attr];
     get_min_max_attributes(num_attr, num_inst, values, min_values, 
     max_values);
-    printf("3\n");
+    // printf("3\n");
     int classes_cnt[num_unique_classes];
     get_classes_cnt(num_unique_classes, unique_classes, num_inst, classes,
         classes_cnt);
-printf("4\n");
+// printf("4\n");
     for (int i = 0; i < num_inst; i++)
     {
         sfoptk[i].num_k_plus = malloc(sizeof(*(sfoptk[i].num_k_plus)) * k_max);
@@ -76,12 +77,12 @@ printf("4\n");
 //         sfoptk[i].k_plus_3 = malloc(sizeof(*(sfoptk[i].k_plus_3)) * num_inst);
 // if(sfoptk[i].k_plus_3 == NULL) {printf("Blad allokacji");};
     } 
-printf("5\n");
+// printf("5\n");
     int k_opt;
     // find_optimal_k(k_max, num_inst, attr_types, num_attr, values, classes, 
     //     num_unique_classes, unique_classes, classes_cnt, min_values, max_values, is_norm, 
     //     &k_opt, classes_pred_find_optk, sfoptk, toptk);
-printf("44\n");
+// printf("44\n");
     for (int i = 0; i < num_inst; i++)
     {
         classes_pred_optk[i] = classes_pred_find_optk[i][k_opt-1];
@@ -182,19 +183,28 @@ printf("DEBUG\n");
     int k_max;
     get_k_max(num_inst, &k_max);
 
+    #ifdef CUDA
+    #pragma omp parallel
+    { 
+        int id = omp_get_thread_num();
+        printf("thread: %d\n", id);
+        my_cuda_init(id);
+    }
+    #endif
+
     for(int is_norm = 0; is_norm < 2; is_norm++) // normalization
     {
         //------------------------ FIND OPTIMAL K NEIGHBOURS ----------------------
         printf("FINDING OPTIMAL K NEIGHBOURS - ");
         printf("%s\n", is_norm ? "NORMALIZED" : "STANDARD");
         double time_total_optk_s = get_time_sec();
-        printf("0\n");
+        // printf("0\n");
 
         int (*classes_pred_find_optk) [k_max] = malloc( sizeof(float[num_inst][k_max]) );
-        printf("01\n");
+        // printf("01\n");
 
         int classes_pred_optk[num_inst];
-        printf("001\n");
+        // printf("001\n");
 
         timing_optk toptk;
         stats_find_optk *sfoptk = malloc(sizeof(*sfoptk) * num_inst);
@@ -230,14 +240,14 @@ printf("55\n");
         create_out_folder_if_not_exist(out_folder_path);
 
         double time_save_out_file_optk_s = get_time_sec();
-        printf("66\n");
+        // printf("66\n");
         // save_out_file_optk(out_path_optk, num_inst, num_attr, values, attr_types, classes, k_max, 
         //     classes_pred_find_optk, sfoptk);
         double time_save_out_file_optk = get_time_sec() - time_save_out_file_optk_s;
-        printf("77\n");
+        // printf("77\n");
         // deallocate_sfoptk(num_inst, sfoptk);
         // free(classes_pred_find_optk);
-        printf("88\n");
+        // printf("88\n");
         char stat_path_optk[MAX_PATH_LEN];
         // get_stat_file_path_optk(out_folder_path, fi.file_name, num_attr, num_inst, k_max, is_norm, 
         //     stat_path_optk);
@@ -310,7 +320,11 @@ printf("55\n");
                     //    printf("ff\n");
                     int test_classes_pred[num_test];
                     stats_predict test_sp[num_test];
-                    //    printf("gg\n");
+                    // //    printf("gg\n");
+                    // predict_triangle_ineq(num_train, num_test, num_attr, k_neigh[k], train_values, train_classes,
+                    //     test_values, attr_types, num_unique_classes, unique_classes,  
+                    //     test_classes_pred, is_norm, test_sp, &tp[cv]);
+
                     predict(num_train, num_test, num_attr, k_neigh[k], train_values, train_classes,
                         test_values, attr_types, num_unique_classes, unique_classes,  
                         test_classes_pred, is_norm, test_sp, &tp[cv]);
@@ -380,6 +394,15 @@ printf("55\n");
     }   // normalization
 
     free(values);
+
+    #ifdef CUDA
+    #pragma omp parallel
+    { 
+        int id = omp_get_thread_num();
+        printf("thread: %d\n", id);
+        my_cuda_destroy(id);
+    }
+    #endif
 
     double time_total = get_time_sec() - time_total_s;
     printf("Total time: %f sec", time_total);

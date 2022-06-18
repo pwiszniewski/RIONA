@@ -22,8 +22,10 @@ void calculate_dissimilairty_vect(float *values1, int num_values2, float *values
     float unique_values[][MAX_UNIQUE_VALUES], int unique_values_cnt[][MAX_UNIQUE_VALUES], 
     int *num_unique_values, float *dissim);
 
-void calculate_dissimilairty_cuda(float *values1, int num_values2, float *values2, int num_attr, char *attr_types, 
+#ifdef CUDA
+void calculate_dissimilairty_cuda(int id, float *values1, int num_values2, float *values2, int num_attr, char *attr_types, 
     float *min_values, float *max_values, int num_unique_classes, 
     int values_classes_cnt[][num_unique_classes][MAX_UNIQUE_VALUES], 
     float unique_values[][MAX_UNIQUE_VALUES], int unique_values_cnt[][MAX_UNIQUE_VALUES], 
     int *num_unique_values, float *dissim);
+#endif

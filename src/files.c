@@ -8,7 +8,7 @@
 void make_directory(const char* name)
 {
 #if defined(__linux__)  || (defined(__CYGWIN__) && !defined(_WIN32))
-    mkdir(name, 700); 
+    mkdir(name, 0700); 
 #else
     _mkdir(name);
 #endif

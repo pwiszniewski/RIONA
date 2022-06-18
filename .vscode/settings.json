@@ -13,6 +13,13 @@
         "riona.h": "c",
         "random": "c",
         "limits": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "array": "c",
+        "deque": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c"
     }
 }

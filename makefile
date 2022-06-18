@@ -1,7 +1,7 @@
 CC=gcc
 LDLIBS=-lm -fopenmp
 LDFLAGS=
-INCLUDES=-Iincludes -IC:\Users\PW\Downloads\lapack\include -IC:\OpenBLAS\include
+INCLUDES=-Iincludes -IC:\Users\PW\Downloads\lapack\include -IC:\OpenBLAS\include -I/opt/OpenBLAS/include
 CFLAGS=-pedantic -Wall -std=gnu99 -O3 -fopenmp
 CUDAOBJ=
 
@@ -33,8 +33,10 @@ release: $(EXENAME)
 debug: CFLAGS+=-g -DDEBUG
 debug: $(EXENAME)
 
-vect: LDLIBS+=-llibopenblas 
-vect: LDFLAGS+=-LC:\OpenBLAS\lib
+
+vect: CFLAGS+=-DVECT
+vect: LDLIBS+=-lopenblas
+vect: LDFLAGS+=-LC:\OpenBLAS\lib -L/opt/OpenBLAS/lib
 vect: $(EXENAME)
 
 vect_debug: CFLAGS+=-g -DDEBUG
@@ -44,8 +46,8 @@ cuda: CFLAGS+=-g -DCUDA
 cuda: INCLUDES+=-I/usr/local/cuda/5.0.35/include/
 cuda: $(OBJ_FILES)
 cuda: cuda_compile
-cuda: LDLIBS+=-lcuda -lcudart -lcublas -lstdc++
-cuda: LDFLAGS+=-L/usr/local_rwth/sw/cuda/5.0.35/lib64
+cuda: LDLIBS+=-lopenblas -lcuda -lcudart -lcublas -lstdc++
+cuda: LDFLAGS+=-LC:\OpenBLAS\lib -L/opt/OpenBLAS/lib -L/usr/local_rwth/sw/cuda/5.0.35/lib64
 cuda: CUDAOBJ+=$(OBJDIR)/my_cuda.o
 cuda: 
 	$(CC) -o $(EXENAME) $(OBJ_FILES) $(CUDAOBJ) $(LDLIBS) $(LDFLAGS)
@@ -57,7 +59,7 @@ cuda_link:
 	$(CC) -o $@ $^ $(OBJ_FILES) $(CUDAOBJ) $(LDLIBS) $(LDFLAGS)
 
 $(EXENAME): $(OBJ_FILES)
-	$(CC) -o $@ $^  $(LDLIBS) $(LDFLAGS)
+	$(CC) -o $@ $^  $(LDFLAGS) $(LDLIBS) 
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<

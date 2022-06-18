@@ -10,6 +10,7 @@
 #include "timing.h"
 #include <string.h>
 #include <omp.h>
+#include <math.h>
 
 typedef struct stats_find_optk {
     int *num_k_plus;
@@ -31,6 +32,11 @@ void find_optimal_k(int k_max, int num_train, char *attr_types, int num_attr,
     int classes_pred[][k_max], stats_find_optk *sfoptk, timing_optk *toptk);
 
 void predict(int num_train, int num_test, int num_attr, int k_neigh, float train_values[num_train][num_attr], 
+    int *train_classes, float test_values[num_test][num_attr], char *attr_types, 
+    int num_unique_classes, int *unique_classes, int *test_classes_pred, bool is_norm,
+    stats_predict *sp, timing_predict *tp);
+
+void predict_triangle_ineq(int num_train, int num_test, int num_attr, int k_neigh, float train_values[num_train][num_attr], 
     int *train_classes, float test_values[num_test][num_attr], char *attr_types, 
     int num_unique_classes, int *unique_classes, int *test_classes_pred, bool is_norm,
     stats_predict *sp, timing_predict *tp);
