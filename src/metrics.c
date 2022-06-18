@@ -85,11 +85,13 @@ void calculate_accuracy(float *acc, tp_fp_tn_fn *tp_fp_tn_fn_arr, int num_unique
     *acc *= 100;
 }
 
+#include <stdio.h>
+
 int calculate_balanced_accuracy_for_class(tp_fp_tn_fn *tp_fp_tn_fn_arr, int class_idx)
 {
     int tp = tp_fp_tn_fn_arr[class_idx].tp;
     int fn = tp_fp_tn_fn_arr[class_idx].fn;
-    return 100.0 * (float)tp / (tp + fn);
+    return 100.0 * ((tp == 0 && fn == 0) ? 1: (float)tp / (tp + fn));
 }
 
 void calculate_balanced_accuracy(float *balanced_acc, tp_fp_tn_fn *tp_fp_tn_fn_arr, 

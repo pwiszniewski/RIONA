@@ -1,9 +1,5 @@
 #include "dissimilarities.h"
 
-#include <cblas.h>
-
-#include "my_cuda.h"
-
 void calculate_svdm(int attr_idx, int value1_idx, int value2_idx, int num_unique_classes,
     int values_classes_cnt[][num_unique_classes][MAX_UNIQUE_VALUES], 
     int unique_values_cnt[][MAX_UNIQUE_VALUES], float *svdm)
@@ -25,7 +21,6 @@ void calculate_svdm(int attr_idx, int value1_idx, int value2_idx, int num_unique
 void calculate_manhattan(float value1, float value2, float min, float max, float *manhattan)
 {
     *manhattan = abs(value1 - value2) / (max - min);
-    // *manhattan = abs(value1 - value2) ;
 }
 
 void calculate_dissimilairty(float *values1, float *values2, int num_attr, char *attr_types, 
@@ -123,7 +118,18 @@ void calculate_dissimilairty_cuda(int id, float *values1, int num_values2, float
     {
         if(attr_types[i] == NOMINAL_TYPE)
         {
+            for (int j = 0; j < num_values2; j++)
+            {
+                float svdm;
+                float value1 = values1[i];
+                int value1_idx = get_unique_value_idx(num_unique_values[i], unique_values[i], value1);
+                float value2 = values2[i*num_values2 + j];
+                int value2_idx = get_unique_value_idx(num_unique_values[i], unique_values[i], value2);
 
+                calculate_svdm(i, value1_idx, value2_idx, num_unique_classes,
+                    values_classes_cnt, unique_values_cnt, &svdm);
+                dissim[j] += svdm;
+            }
         }
         else if(attr_types[i] == NUMERICAL_TYPE)
         {

@@ -12,6 +12,15 @@
 #include <omp.h>
 #include <math.h>
 
+#ifdef VECT
+#include <cblas.h>
+#endif
+
+#ifdef CUDA
+#include <cblas.h>
+#include "my_cuda.h"
+#endif
+
 typedef struct stats_find_optk {
     int *num_k_plus;
     int *num_k_plus_promising; 
@@ -49,3 +58,9 @@ void get_classification_vector(float *trn_values, int num_attr, float train_valu
     float unique_values[][MAX_UNIQUE_VALUES], int unique_values_cnt[][MAX_UNIQUE_VALUES], int *num_unique_values, 
     char *attr_types, int most_freq_class_idx_train, float *dec_strength, bool is_norm, 
     int *num_promising, int *decisions, double *time_verif_rule);
+
+void predict_triangle_ineq_with_updating_eps_neigh(int num_train, int num_test, int num_attr, int k_neigh, 
+    float train_values[num_train][num_attr], int *train_classes, 
+    float test_values[num_test][num_attr], char *attr_types, int num_unique_classes, 
+    int *unique_classes, int *test_classes_pred, bool is_norm, stats_predict *sp, 
+    timing_predict *tp);

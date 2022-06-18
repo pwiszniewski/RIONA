@@ -1,7 +1,7 @@
 CC=gcc
 LDLIBS=-lm -fopenmp
 LDFLAGS=
-INCLUDES=-Iincludes -IC:\Users\PW\Downloads\lapack\include -IC:\OpenBLAS\include -I/opt/OpenBLAS/include
+INCLUDES=-Iincludes -IC:\OpenBLAS\include -I/opt/OpenBLAS/include
 CFLAGS=-pedantic -Wall -std=gnu99 -O3 -fopenmp
 CUDAOBJ=
 

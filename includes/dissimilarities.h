@@ -6,6 +6,14 @@
 #include <stdio.h>
 #include "values.h"
 
+#ifdef VECT
+#include <cblas.h>
+#endif
+
+#ifdef CUDA
+#include "my_cuda.h"
+#endif
+
 void calculate_svdm(int attr_idx, int value1_idx, int value2_idx, int num_unique_classes,
     int values_classes_cnt[][num_unique_classes][MAX_UNIQUE_VALUES], 
     int unique_values_cnt[][MAX_UNIQUE_VALUES], float *svdm);

@@ -32,6 +32,12 @@ bool get_out_folder_path(char *out_path, char *file_name, char *out_folder_path)
     return (stored >= 0) && (stored < MAX_PATH_LEN);
 }
 
+bool get_out_file_path_main(char *out_folder_path, char *out_path)
+{
+    size_t stored = snprintf(out_path, MAX_PATH_LEN, "%s/_OUT_MAIN.txt", out_folder_path);
+    return (stored >= 0) && (stored < MAX_PATH_LEN);
+}
+
 bool get_out_file_path_griona(char *out_folder_path, char *file_name, int num_attr, int num_inst, 
     int k_neigh, bool is_norm, char *out_path)
 {
@@ -42,11 +48,12 @@ bool get_out_file_path_griona(char *out_folder_path, char *file_name, int num_at
 }
 
 bool get_stat_file_path_griona(char *out_folder_path, char *file_name, int num_attr, int num_inst, 
-    int k_neigh, bool is_norm, char *out_path)
+    int k_neigh, bool is_norm, bool is_kopt, char *out_path)
 {
     char *norm = is_norm ? "norm" : "";
-    size_t stored = snprintf(out_path, MAX_PATH_LEN, "%s/STAT_G-RIONA_%s_A%d_R%d_k%d_%s.txt", 
-        out_folder_path, file_name, num_attr, num_inst, k_neigh, norm);
+    char *kopt = is_kopt ? "opt" : "";
+    size_t stored = snprintf(out_path, MAX_PATH_LEN, "%s/STAT_G-RIONA_%s_A%d_R%d_k%d%s_%s.txt", 
+        out_folder_path, file_name, num_attr, num_inst, k_neigh, kopt, norm);
     return (stored >= 0) && (stored < MAX_PATH_LEN);
 }
 
@@ -193,7 +200,6 @@ bool save_stat_file_griona(char *stat_path, stats_griona *st)
     fprintf(ptr, "# of distinct decision values: %d\n", st->num_classes);
     char *type_norm = st->is_norm ? "normalized" : "standard";
     fprintf(ptr, "type of G-RIONA: %s\n", type_norm);
-    fprintf(ptr, "value of k: %d\n", st->k_fold);
 
     metrics (*pred_metrics)[st->k_fold] = st->pred_metrics;
     for(int i = 0; i < st->num_cv; i++)
@@ -259,6 +265,7 @@ bool save_stat_file_optk(char *stat_path, stats_optk *st)
     char *type_norm = st->is_norm ? "normalized" : "standard";
     fprintf(ptr, "type of findOptimalK: %s\n", type_norm);
     fprintf(ptr, "value of k_max: %d\n", st->k_max);
+    fprintf(ptr, "value of k_opt: %d\n", st->k_opt);
 
     fprintf(ptr, "Metrics: \n");
     metrics *pred_metrics = st->pred_metrics;

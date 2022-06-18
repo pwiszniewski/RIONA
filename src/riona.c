@@ -1,6 +1,5 @@
 #include "riona.h"
-#include <cblas.h>
-#include "my_cuda.h"
+
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -73,33 +72,33 @@ int compare (const void * a, const void * b)
   return (fa > fb) - (fa < fb);
 }
 
+// static void quicksort_indices1(float *dissim, int *indices, int num)
+// {
+//     int wc (const void * a, const void * b) {return(cmp_func(dissim, a,b));};
+//     qsort(indices, num, sizeof(*indices), wc);
+// }
+
+// static void quicksort_indices2(float *dissim, int *indices, int num)
+// {
+//     pair parr[num];
+//     for (int i = 0; i < num; i++)
+//     {
+//         parr[i].idx = indices[i];
+//         parr[i].val = dissim[i];
+//     }
+
+//     qsort(parr, num, sizeof(*parr), compare);
+
+//         for (int i = 0; i < num; i++)
+//     {
+//         indices[i] = parr[i].idx;
+//     }
+// }
+
 
 void sort_indices(int num, float *dissim, int *indices)
 {
-
     quicksort_indices(dissim, indices, 0, num - 1);
-
-    // int wc (const void * a, const void * b) {return(cmp_func(dissim, a,b));};
-    // qsort(indices, num, sizeof(*indices), wc);
-
-    // 
-
-
-
-    // pair parr[num];
-    //     for (int i = 0; i < num; i++)
-    // {
-    //     parr[i].idx = indices[i];
-    //     parr[i].val = dissim[i];
-    // }
-
-    // qsort(parr, num, sizeof(*parr), compare);
-
-    //     for (int i = 0; i < num; i++)
-    // {
-    //     indices[i] = parr[i].idx;
-    // }
-
 }
 
 void copy_k_plus_indices(int k_plus, int **dest, int *indices, int *indices_org)
@@ -225,10 +224,6 @@ void find_optimal_k(int k_max, int num_train, char *attr_types, int num_attr,
     float (*unique_values) [MAX_UNIQUE_VALUES] = malloc( sizeof(float[num_attr][MAX_UNIQUE_VALUES]));
     get_unique_values(num_attr, attr_types, num_train, values, num_unique_values, unique_values);
 
-
-    // int values_classes_cnt[num_attr][num_unique_classes][MAX_UNIQUE_VALUES];
-    // int unique_values_cnt[num_attr][MAX_UNIQUE_VALUES];
-
     int values_classes_cnt[num_attr][num_unique_classes][MAX_UNIQUE_VALUES];
     int (*unique_values_cnt)[MAX_UNIQUE_VALUES] = malloc(sizeof(int[num_attr][MAX_UNIQUE_VALUES]));
     get_unique_values_cnt(num_attr, attr_types, num_unique_classes, unique_classes, classes, 
@@ -236,16 +231,10 @@ void find_optimal_k(int k_max, int num_train, char *attr_types, int num_attr,
         unique_values_cnt);
 
     memset(toptk, 0, sizeof(*toptk));
-printf("num_train %d\n", num_train);
+
     #pragma omp parallel for 
     for (int i = 0; i < num_train; i++)
     {
-        printf("%d\n", i);
-        // float dissim_train[num_train - 1];
-        // int indices[num_train - 1];
-        // int indices_org[num_train - 1];
-        // int indices_org_sorted[num_train - 1];
-
         float *dissim_train = malloc(sizeof(*dissim_train) * (num_train - 1));
         int *indices = malloc(sizeof(*indices) * (num_train - 1));
         int *indices_org = malloc(sizeof(*indices_org) * (num_train - 1));
@@ -292,7 +281,6 @@ printf("num_train %d\n", num_train);
         free(dissim_train);
 
         float *dec_strength = malloc(sizeof(*dec_strength) * num_unique_classes);
-        // float dec_strength[num_unique_classes];
         int k_max_plus = sfoptk[i].num_k_plus[k_max-1];
         int num_promising[k_max_plus];
         get_classification_vector(values[i], num_attr, values, 
@@ -380,29 +368,28 @@ void predict(int num_train, int num_test, int num_attr, int k_neigh, float train
     stats_predict *sp, timing_predict *tp)
 {
     static int counter = 0;
-    // printf("111\n");
+
     float min_values_train[num_attr];
     float max_values_train[num_attr];
     get_min_max_attributes(num_attr, num_train, train_values, min_values_train, 
     max_values_train);
-// printf("222\n");
+
     int train_classes_cnt[num_unique_classes];
     get_classes_cnt(num_unique_classes, unique_classes, num_train, train_classes,
         train_classes_cnt);
-// printf("333\n");
+
     int num_unique_values[num_attr];
     float unique_values[num_attr][MAX_UNIQUE_VALUES];
     get_unique_values(num_attr, attr_types, num_train, train_values, num_unique_values, unique_values);
-// printf("444\n");
+
     int (*unique_values_cnt)[MAX_UNIQUE_VALUES] = malloc(sizeof(int[num_attr][MAX_UNIQUE_VALUES]));
     int (*values_classes_cnt)[num_unique_classes][MAX_UNIQUE_VALUES] = malloc(sizeof(int[num_attr][num_unique_classes][MAX_UNIQUE_VALUES]));
     get_unique_values_cnt(num_attr, attr_types, num_unique_classes, unique_classes, train_classes, 
     num_unique_values, num_train, MAX_UNIQUE_VALUES, train_values, unique_values, values_classes_cnt, 
     unique_values_cnt);
-// printf("555\n");
+
     memset(tp, 0, sizeof(*tp));
     memset(sp, 0, sizeof(*sp) * num_test);
-// printf("666\n");
 
     #if defined(VECT) || defined(CUDA)
     float (*train_values_t) [num_train] = malloc( sizeof(float[num_attr][num_train]) );
@@ -465,17 +452,6 @@ void predict(int num_train, int num_test, int num_attr, int k_neigh, float train
         sp[i].k_plus = get_k_plus(k_neigh, num_train, dissim, indices);
         tp->time_det_k_plus += get_time_sec() - time_det_k_plus_obj_s;
 
-//         if(counter == 201 && i==1)
-// {
-//     printf("//////////////////////////////\n");
-//     for (int j = 0; j < sp[i].k_plus; j++)
-//     {
-
-//         printf("%2d: %f %2d\n", j, dissim[indices[j]], indices[j]);
-//     }
-// }
-
-        // int dec_strength[num_unique_classes];
         int *dec_strength = malloc(sizeof(*dec_strength) * num_unique_classes);
 
         double time_verif_rule_obj_s = get_time_sec();
@@ -501,8 +477,6 @@ void predict(int num_train, int num_test, int num_attr, int k_neigh, float train
         test_classes_pred[i] = unique_classes[dec];
 
         free(dec_strength);
-
-        // my_cuda_destroy(omp_get_thread_num());
     }
     free(unique_values_cnt);
     free(values_classes_cnt);
@@ -523,8 +497,6 @@ void predict(int num_train, int num_test, int num_attr, int k_neigh, float train
 
     counter++;
 }
-
-
 
 
 static void get_start_end(float curr_dissim_ref, int k_neigh, int num_train, float *dissim_ref,
@@ -616,7 +588,181 @@ void predict_triangle_ineq(int num_train, int num_test, int num_attr, int k_neig
     unique_values_cnt);
     memset(tp, 0, sizeof(*tp));
     memset(sp, 0, sizeof(*sp) * num_test);
-//////////////// calculate reference ///////////////////////////
+
+//////////////// calculate reference distances ///////////////////////////
+
+    float *dissim_ref = malloc(sizeof(*dissim_ref) * num_train);
+    memset(dissim_ref, 0, sizeof(*dissim_ref) * num_train);
+    int *indices_ref = malloc(sizeof(*indices_ref) * num_train);
+    float *ref_values = malloc(sizeof(*ref_values) * num_attr);
+    for (int j = 0; j < num_attr; j++)
+    {
+        ref_values[j] = max_values_train[j];
+    }
+    
+
+    double time_svdm_s = get_time_sec();
+    for (int j = 0; j < num_train; j++)
+    {
+        calculate_dissimilairty(ref_values, train_values[j], num_attr, attr_types,
+        min_values_train, max_values_train, num_unique_classes, values_classes_cnt, unique_values, 
+        unique_values_cnt, num_unique_values, &dissim_ref[j]);
+        indices_ref[j] = j;
+    }
+    tp->time_svdm += get_time_sec() - time_svdm_s;
+
+    double time_sort_k_plus_obj_s = get_time_sec();
+    sort_indices(num_train, dissim_ref, indices_ref);
+    tp->time_sort_k_plus += get_time_sec() - time_sort_k_plus_obj_s;
+
+///////////////////////////////////////////////////////////////
+
+    #pragma omp parallel for 
+    for (int i = 0; i < num_test; i++)
+    {
+        float *dissim = malloc(sizeof(*dissim) * num_train);
+        memset(dissim, 0, sizeof(*dissim) * num_train);
+        int *indices = malloc(sizeof(*indices) * num_train);
+
+        float curr_dissim_ref;
+        calculate_dissimilairty(ref_values, test_values[i], num_attr, attr_types,
+        min_values_train, max_values_train, num_unique_classes, values_classes_cnt, unique_values, 
+        unique_values_cnt, num_unique_values, &curr_dissim_ref);
+
+        int start, end;
+        get_start_end(curr_dissim_ref, k_neigh, num_train, dissim_ref, indices_ref, &start, &end);
+
+        double time_svdm_s = get_time_sec();
+        int cnt = 0;
+        for (int j = start; j <= end; j++)
+        {
+            calculate_dissimilairty(test_values[i], train_values[indices_ref[j]], num_attr, attr_types,
+            min_values_train, max_values_train, num_unique_classes, values_classes_cnt, unique_values, 
+            unique_values_cnt, num_unique_values, &dissim[indices_ref[j]]);
+            indices[cnt] = indices_ref[j];
+            cnt++;
+        }
+        tp->time_svdm += get_time_sec() - time_svdm_s;
+
+
+        double time_sort_k_plus_obj_s = get_time_sec();
+        sort_indices(cnt, dissim, indices);
+        tp->time_sort_k_plus += get_time_sec() - time_sort_k_plus_obj_s;
+
+        float max_dissim = dissim[indices[cnt - 1]] ;
+
+        // Backward
+        start--;
+        while(start >= 0) 
+        {
+            int idx = indices_ref[start];
+            if(dissim_ref[idx] < curr_dissim_ref - max_dissim)
+            {
+                break;
+            }
+            start--;
+        }
+        start++;
+
+        // Forward
+        end++;
+        while(end < num_train) 
+        {
+            int idx = indices_ref[end];
+            if(dissim_ref[idx] > curr_dissim_ref + max_dissim)
+            {
+                break;
+            }
+            end++;
+        }
+        end--;
+
+
+        time_svdm_s = get_time_sec();
+        cnt = 0;
+        for (int j = start; j <= end; j++)
+        {
+            calculate_dissimilairty(test_values[i], train_values[indices_ref[j]], num_attr, attr_types,
+            min_values_train, max_values_train, num_unique_classes, values_classes_cnt, unique_values, 
+            unique_values_cnt, num_unique_values, &dissim[indices_ref[j]]);
+            indices[cnt] = indices_ref[j];
+            cnt++;
+        }
+        tp->time_svdm += get_time_sec() - time_svdm_s;
+
+        time_sort_k_plus_obj_s = get_time_sec();
+        sort_indices(cnt, dissim, indices);
+        tp->time_sort_k_plus += get_time_sec() - time_sort_k_plus_obj_s;
+
+
+        double time_det_k_plus_obj_s = get_time_sec();
+        sp[i].k_plus = get_k_plus(k_neigh, cnt, dissim, indices);
+        tp->time_det_k_plus += get_time_sec() - time_det_k_plus_obj_s;
+
+        int *dec_strength = malloc(sizeof(*dec_strength) * num_unique_classes);
+
+        double time_verif_rule_obj_s = get_time_sec();
+        calculate_decisions_strength(num_unique_classes, unique_classes, dec_strength, 
+            sp[i].k_plus, num_attr, test_values[i], train_values, train_classes, indices, 
+            values_classes_cnt, unique_values, unique_values_cnt, num_unique_values, attr_types,
+            &(sp[i].k_plus_promising));
+        tp->time_verif_rule += get_time_sec() - time_verif_rule_obj_s;
+
+        free(dissim);
+        free(indices);
+
+        int dec;
+        if(is_norm)
+        {
+            dec = get_decision_with_greatest_norm_support(num_unique_classes, dec_strength, 
+                train_classes_cnt);
+        }
+        else
+        {
+            dec = get_decision_with_greatest_support(num_unique_classes, dec_strength);
+        }
+        test_classes_pred[i] = unique_classes[dec];
+
+        free(dec_strength);
+
+    }
+    free(unique_values_cnt);
+    free(values_classes_cnt);
+            free(dissim_ref);
+        free(indices_ref);
+
+    tp->time_det_k_plus /= num_test;
+    tp->time_sort_k_plus /= num_test; 
+    tp->time_verif_rule /= num_test;
+}
+
+
+void predict_triangle_ineq_with_updating_eps_neigh(int num_train, int num_test, int num_attr, int k_neigh, 
+    float train_values[num_train][num_attr], int *train_classes, 
+    float test_values[num_test][num_attr], char *attr_types, int num_unique_classes, 
+    int *unique_classes, int *test_classes_pred, bool is_norm, stats_predict *sp, 
+    timing_predict *tp)
+{
+
+    float min_values_train[num_attr];
+    float max_values_train[num_attr];
+    get_min_max_attributes(num_attr, num_train, train_values, min_values_train, 
+    max_values_train);
+    int train_classes_cnt[num_unique_classes];
+    get_classes_cnt(num_unique_classes, unique_classes, num_train, train_classes,
+        train_classes_cnt);
+    int num_unique_values[num_attr];
+    float unique_values[num_attr][MAX_UNIQUE_VALUES];
+    get_unique_values(num_attr, attr_types, num_train, train_values, num_unique_values, unique_values);
+    int (*unique_values_cnt)[MAX_UNIQUE_VALUES] = malloc(sizeof(int[num_attr][MAX_UNIQUE_VALUES]));
+    int (*values_classes_cnt)[num_unique_classes][MAX_UNIQUE_VALUES] = malloc(sizeof(int[num_attr][num_unique_classes][MAX_UNIQUE_VALUES]));
+    get_unique_values_cnt(num_attr, attr_types, num_unique_classes, unique_classes, train_classes, 
+    num_unique_values, num_train, MAX_UNIQUE_VALUES, train_values, unique_values, values_classes_cnt, 
+    unique_values_cnt);
+    memset(tp, 0, sizeof(*tp));
+    memset(sp, 0, sizeof(*sp) * num_test);
+
+//////////////// calculate reference distances ///////////////////////////
 
     float *dissim_ref = malloc(sizeof(*dissim_ref) * num_train);
     memset(dissim_ref, 0, sizeof(*dissim_ref) * num_train);

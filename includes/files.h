@@ -49,6 +49,7 @@ typedef struct stats_optk {
     int *unique_classes;
     bool is_norm;
     int k_max;
+    int k_opt;
     metrics *pred_metrics;
     metrics *avg_metrics;
     double time_total;
@@ -69,11 +70,13 @@ bool load_file(file_info *fi, char *file_path, int *classes, int num_attr,
 bool load_info(char *info_path, int num_attr, char *attr_types, char attr_names[][MAX_NAME_LEN], 
     char *target_name, int *class_idx);
 
+bool get_out_file_path_main(char *out_folder_path, char *out_path);
+
 bool get_out_file_path_griona(char *out_folder_path, char *file_name, int num_attr, int num_inst, 
     int k_neigh, bool is_norm, char *out_path);
 
 bool get_stat_file_path_griona(char *out_folder_path, char *file_name, int num_attr, int num_inst, 
-    int k_neigh, bool is_norm, char *out_path);
+    int k_neigh, bool is_norm, bool is_kopt, char *out_path);
 
 bool get_out_file_path_optk(char *out_folder_path, char *file_name, int num_attr, int num_inst, 
     int k_max, bool is_norm, char *out_path);
