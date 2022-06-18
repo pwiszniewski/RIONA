@@ -30,7 +30,6 @@ __global__ void manhattan_kernel(int num_values2, float * values2,
 
 void my_cuda_init(int id)
 {
-  // cublasHandle_t handle;
   cublasStatus_t cbstatus = cublasCreate(&handles[id]);
 
   if (cbstatus != CUBLAS_STATUS_SUCCESS) {
@@ -86,20 +85,14 @@ int num_attr,float min, float max, float *dissim)
 {
      size_t n_bytes = num_values2 * sizeof(float);
 
-    cudaMemcpyAsync(d_temp[id], dissim, n_bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_temp[id], dissim, n_bytes, cudaMemcpyHostToDevice);
 
-    manhattan_kernel<<<4096,2, id>>>(num_values2, &d_train[idx_value2*num_values2], 
+    manhattan_kernel<<<4096,32>>>(num_values2, &d_train[idx_value2*num_values2], 
       value1, min, max, d_temp[id]);
 
 
-      cudaMemcpyAsync(dissim, d_temp[id], n_bytes, cudaMemcpyDeviceToHost);
-    for (int i = 0; i < num_values2; i++) 
-    {
-        dissim[i] = i;
-    }
-
-
-    
+      cudaMemcpy(dissim, d_temp[id], n_bytes, cudaMemcpyDeviceToHost);
+   
 
 }
 }
