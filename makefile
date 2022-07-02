@@ -47,7 +47,7 @@ cuda: INCLUDES+=-I/usr/local/cuda/5.0.35/include/
 cuda: $(OBJ_FILES)
 cuda: cuda_compile
 cuda: LDLIBS+=-lopenblas -lcuda -lcudart -lcublas -lstdc++
-cuda: LDFLAGS+=-LC:\OpenBLAS\lib -L/opt/OpenBLAS/lib -L/usr/local_rwth/sw/cuda/5.0.35/lib64
+cuda: LDFLAGS+=-LC:\OpenBLAS\lib -L/opt/OpenBLAS/lib -L/usr/local/cuda-11.7/lib64
 cuda: CUDAOBJ+=$(OBJDIR)/my_cuda.o
 cuda: 
 	$(CC) -o $(EXENAME) $(OBJ_FILES) $(CUDAOBJ) $(LDLIBS) $(LDFLAGS)

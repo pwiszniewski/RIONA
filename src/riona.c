@@ -393,13 +393,13 @@ void predict(int num_train, int num_test, int num_attr, int k_neigh, float train
 
     #if defined(VECT) || defined(CUDA)
     float (*train_values_t) [num_train] = malloc( sizeof(float[num_attr][num_train]) );
-    cblas_somatcopy(CblasRowMajor, CblasTrans, num_train, num_attr, 1, 
+    cblas_somatcopy(CblasRowMajor, CblasTrans, num_train, num_attr, 1.0, 
         (float *)train_values, num_attr, (float *)train_values_t, num_train);
     #endif
 
     #ifdef CUDA
     float (*test_values_t) [num_test] = malloc( sizeof(float[num_attr][num_test]) );
-    cblas_somatcopy(CblasRowMajor, CblasTrans, num_test, num_attr, 1, 
+    cblas_somatcopy(CblasRowMajor, CblasTrans, num_test, num_attr, 1.0, 
         (float *)test_values, num_attr, (float *)test_values_t, num_test);
     copy_train_test_cuda(num_train, num_test, num_attr, (float *)train_values_t,
     (float *)test_values_t);

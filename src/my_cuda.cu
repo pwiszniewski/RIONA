@@ -92,13 +92,5 @@ int num_attr,float min, float max, float *dissim)
 
 
       cudaMemcpy(dissim, d_temp[id], n_bytes, cudaMemcpyDeviceToHost);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-   
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
 }
